@@ -234,27 +234,13 @@ def ffsampling_fft(t, T, sigmin, randombytes):
 
     n = len(t[0]) * fft_ratio
     
-    print("ENTER ffsampling:")
-    print("n =", n)
-    #print("len(T) =", len(T))
-    #print(f"{'  '*depth}Entering ffsampling_fft, n={n}, depth={depth}")
+    
     z = [0, 0]
-    #print("T in FFsampling: ", T)
-    if len(T) == 2:
-        print("Debug n: ", n)
+    
     if n > 1:
-        if n <= 4:
-            print("T :", T)
-        #print("if n > 1 T: ", T)
         l10, T0, T1 = T
-        print("Debug Z: ", z)
-        # Sample second coordinate first
-        print("Calling z1 with:")
-        print("n =", n)
-        print("len(T1) =", len(T1))
-        #print("T1 =", T1)
+      
         z1 = ffsampling_fft(split_fft(t[1]), T1, sigmin, randombytes)
-        print("Z1: ", z1)
         z[1] = merge_fft(z1)
 
         # Compute t0'
@@ -268,19 +254,13 @@ def ffsampling_fft(t, T, sigmin, randombytes):
 
     elif n == 1:
         # Leaf: scalar Gaussian sampling
-        print("t[0][0]", t[0][0])
-        print("t[1][0]", t[1][0])
         mu0 = clean_real(t[0][0])
         mu1 = clean_real(t[1][0])
 
-        print("Debug mu0:", mu0)
-        print("Debug mu1:", mu1)
         # IMPORTANT: Falcon uses T[0] as sigma directly
         d00 = T[0]
-        print("T0: ", T[0])
+
         sigma = (d00[0] if isinstance(d00, list) else d00)
-        print("Sigma: ", sigma)
-        print("Sigmin: ", sigmin)
         
         z[0] = [samplerz(mu0, sigma, sigmin, randombytes)]
         z[1] = [samplerz(mu1, sigma, sigmin, randombytes)]

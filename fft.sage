@@ -104,8 +104,8 @@ def ifft(f_fft):
     elif (n == 2):
         a = CDF(f_fft[0])
         b = CDF(f_fft[1])
-        print("a: ", a)
-        print("b: ", b)
+        #print("a: ", a)
+        #print("b: ", b)
         return [
             (a + b) / 2,
             (a - b) / (2 * CDF(1j))

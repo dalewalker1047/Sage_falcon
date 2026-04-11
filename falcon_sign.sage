@@ -88,22 +88,12 @@ def parse_secret_key(sk, n):
     f, g, F, G = sk
 
 
-    """
-    print("Debug: Type of pad_to_n:", type(pad_to_n))
-    print("Debug: Value of n:", n)
-    print("Debug: Type and value of f:", type(f), f)
-    print("Debug: Type and value of g:", type(g), g)
-    print("Debug: Type and value of F:", type(F), F)
-    print("Debug: Type and value of G:", type(G), G)
-    """
 
     f = pad_to_n(f)
     g = pad_to_n(g)
     F = pad_to_n(F)
     G = pad_to_n(G)
-    #print("Debug parse_secret_key end")
-    #print("Type of sage_vector:", type(sage_vector))
-    #print("Type of ZZ:", type(ZZ))
+
     return sage_vector(ZZ, f), sage_vector(ZZ, g), sage_vector(ZZ, F), sage_vector(ZZ, G)
 
 def pad_to_n(poly):
@@ -123,20 +113,19 @@ def sign(sk, message, randombytes=urandom):
     hashed = hash_to_point(message, salt, n, q)
     
     while True:
-        #print("T slice: ", T_fft[-2:])
-        print(type(T_fft))
-        print(len(T_fft))
+
         
         if randombytes == urandom:
-            #print("Hashed: ", hashed)
-            #print(T_fft)
+
             s = ffsampling_fft([hashed, hashed], T_fft, 1.2, randombytes)
         else:
             seed = randombytes(SEED_LEN)
             s = ffsampling_fft([hashed, hashed], T_fft, 1.2, seed)
-        print("debug: got to norm sign")
-        norm_sign = sum(Integer(coeff)**2 for coeff in s[0])
-        norm_sign += sum(Integer(coeff)**2 for coeff in s[1])
+        #print("s[0]", s[0])
+        #print("\n\ns[1]", s[1])
+
+        norm_sign = sum(int(coeff)**2 for coeff in s[0])
+        norm_sign += sum(int(coeff)**2 for coeff in s[1])
 
         if norm_sign <= 1.36 * n:
             enc_s = compress(s[1], sig_bytelen - SALT_LEN - HEAD_LEN, n)
