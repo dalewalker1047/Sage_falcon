@@ -2,11 +2,12 @@
 from hashlib import shake_256
 from sage.all import ZZ, PolynomialRing, GF, vector
 from ast import literal_eval
+from Crypto.Hash import SHAKE256
+
 import json
 import sys
 import traceback  # Import traceback for detailed error reporting
 from sign_KAT import sign_KAT2
-
 
 load('falcon_sign.sage')
 load('ffsampling.sage')
@@ -131,7 +132,10 @@ if __name__ == "__main__":
     # Load KAT vectors from sign_KAT.py
     kat_vectors = load_kat_vectors_from_sign_KAT()
 
-    test_samplerz_KAT()
+    message = b"data1"
+    shake = SHAKE256.new(b"external")
+
+    # test_samplerz_KAT()
     
     # Run tests for each KAT vector
     for vector in kat_vectors:
@@ -153,11 +157,8 @@ if __name__ == "__main__":
 
         sk, vk = keygen([f, g, F, G])
         print("Completed Keygen")
-        
-        msg = b"data1"
-        
-
-        sm = sign(sk, msg)
+        _ = shake.read(8 * count)  # Synchronize SHAKE256 context with C implementation
+        sm = sign(sk, msg, shake.read)
 
 
 

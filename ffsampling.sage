@@ -239,14 +239,26 @@ def ffsampling_fft(t, T, sigmin, randombytes):
         l10, T0, T1 = T
       
         z1 = ffsampling_fft(split_fft(t[1]), T1, sigmin, randombytes)
+        
+        
         z[1] = merge_fft(z1)
+
 
         # Compute t0'
         t0b = add_fft(t[0], mul_fft(sub_fft(t[1], z[1]), l10))
 
         # Sample first coordinate
         z0 = ffsampling_fft(split_fft(t0b), T0, sigmin, randombytes)
+
+        print("\nz0: ", z0)
+        print("z1: ", z1)
+
+
         z[0] = merge_fft(z0)
+
+        print("z[0]: ", z[0])
+        print("z[1]: ", z[1])
+        exit(0)
 
         return z
 

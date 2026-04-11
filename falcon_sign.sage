@@ -128,9 +128,18 @@ def sign(sk, message, randombytes=urandom):
         # print("s", s)
 
         norm_sign = sum(coeff**2 for coeff in s[0])
+
+        print("Norm of s[0]: ", norm_sign)
+
         norm_sign += sum(coeff**2 for coeff in s[1])
 
-        if norm_sign <= 1.36 * n:
+        print("Norm of signature: ", norm_sign)
+
+        print("Needs to be less than: ", 70265242)
+
+        print("ratio: ", norm_sign//70265242)
+
+        if norm_sign <= 70265242:
             enc_s = compress(s[1], sig_bytelen - SALT_LEN - HEAD_LEN, n)
 
             if enc_s is not False:
@@ -363,8 +372,12 @@ def __sample_preimage__(B0_fft, T_fft, point, seed=None):
         v0 = [int(round(elt)) for elt in ifft_2(v0_fft)]
         v1 = [int(round(elt)) for elt in ifft_2(v1_fft)]
 
+        # print("v0: ", v0)
+        # print("v1: ", v1)
+        # print("point: ", point)
         # The difference s = (point, 0) - v is such that:
         #     s is short
         #     s[0] + s[1] * h = point
         s = [sub(point, v0), neg(v1)]
+        # print("s:" , s)
         return s
