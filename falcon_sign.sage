@@ -12,6 +12,7 @@ load('fft.sage')
 load('samplerz.sage')
 load('encoding.sage')
 load('ntt.sage')
+load('ntrugen.sage')
 
 n = 512
 q = 12289
@@ -196,7 +197,7 @@ def deserialize_to_poly(bytestring, n):
     BITS_PER_COEFF = 14
     mask = (1 << BITS_PER_COEFF) - 1
 
-    int_buffer = Integer(int.from_bytes(bytestring, 'big'))
+    int_buffer = Integer(int.from_bytes(bytestring, 'little'))
 
     coeffs = []
 
@@ -249,11 +250,13 @@ def keygen(polys: Optional[List[List[int]]]=None):
 
     # The public key is a polynomial such that h*f = g mod (Phi,q)
     h = div_zq(g, f)
+    
+
 
     sk = (f, g, F, G, B0_fft, T_fft)
     #convert h into a python int before passing to serialize
     h = [safe_int(x) for x in h]
-
+    
     vk = serialize_poly(h)
     return (sk, vk)
 
@@ -263,17 +266,19 @@ def serialize_poly(poly: List[int]) -> bytes:
     We assume that all entries are between 0 and q - 1.
     """
     n = len(poly)
+
     if (min(poly) < 0) or (max(poly) >= q):
         raise ValueError("The entries of poly are outside bounds")
 
-    BITS_PER_COEF = 14
-    int_buffer = 0
+    BITS_PER_COEF = int(14)
+    int_buffer = int(0)
     for idx in range(n):
-        int_buffer ^= int(poly[idx]) << (idx * BITS_PER_COEF)
+        shift = idx * BITS_PER_COEF
+        int_buffer |= poly[idx] << shift
     # The "+ 7" allows to round to the nearest higher integer.
     bytelen = (n * BITS_PER_COEF + 7) >> 3
-    return int(int_buffer).to_bytes(bytelen, byteorder="big")
 
+    return int_buffer.to_bytes(bytelen, 'little')
 
 def normalize_tree(tree, sigma):
     """
