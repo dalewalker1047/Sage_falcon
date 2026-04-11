@@ -32,6 +32,11 @@ sigma_min = {
     1024: 1.298280334,
 }
 
+sigma = {
+    512: 165.7366171829776,
+    1024: 168.38857144654395,
+}
+
 HEAD_LEN = 1
 SALT_LEN = 40
 SEED_LEN = 56
@@ -236,11 +241,11 @@ def keygen(polys: Optional[List[List[int]]]=None):
 
     T_fft = ffldl_fft(G0_fft)
 
-    sigma=165.7366171829776
+    #sigma=165.7366171829776
     # for 512 sigma=165.7366171829776
     # for 1024 sigma=168.38857144654395
     # Normalize Falcon tree
-    normalize_tree(T_fft, sigma_min[n])
+    normalize_tree(T_fft, sigma[n])
 
     # The public key is a polynomial such that h*f = g mod (Phi,q)
     h = div_zq(g, f)

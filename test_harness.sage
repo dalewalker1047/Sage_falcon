@@ -121,8 +121,11 @@ if __name__ == "__main__":
         G = pad_to_n(G)
 
         sk, vk = keygen([f, g, F, G])
+        print("Completed Keygen")
+        
         msg = b"data1"
         
+
         sm = sign(sk, msg)
 
 
