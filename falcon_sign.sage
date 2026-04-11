@@ -111,23 +111,24 @@ def sign(sk, message, randombytes=urandom):
     salt = randombytes(SALT_LEN)
 
     hashed = hash_to_point(message, salt, n, q)
-    
+    loop = 1
     while True:
-
+        print("Loop: ", loop)
+        loop += 1
         s = None
 
         if randombytes == urandom:
-            s = ffsampling_fft([hashed, hashed], T_fft, 1.2, randombytes)
+            s = __sample_preimage__(B0_fft, T_fft, hashed)
         else:
             seed = randombytes(SEED_LEN)
-            s = ffsampling_fft([hashed, hashed], T_fft, 1.2, seed)
+            s = __sample_preimage__(B0_fft, T_fft, hashed, seed=seed)
         # print("s[0]", s[0])
         #print("\n\ns[1]", s[1])
 
         # print("s", s)
 
-        norm_sign = sum(int(coeff)**2 for coeff in s[0])
-        norm_sign += sum(int(coeff)**2 for coeff in s[1])
+        norm_sign = sum(coeff**2 for coeff in s[0])
+        norm_sign += sum(coeff**2 for coeff in s[1])
 
         if norm_sign <= 1.36 * n:
             enc_s = compress(s[1], sig_bytelen - SALT_LEN - HEAD_LEN, n)
@@ -327,3 +328,43 @@ def unpack_sk(self, sk_bytes: bytes):
         polys[i] = [((coef + (q >> 1)) % q) - (q >> 1) for coef in polys[i]]
     sk, _ = self.keygen(polys)
     return sk
+
+def __sample_preimage__(B0_fft, T_fft, point, seed=None):
+        """
+        Sample a short vector s such that s[0] + s[1] * h = point.
+        """
+        [[a, b], [c, d]] = B0_fft
+
+        # We compute a vector t_fft such that:
+        #     (fft(point), fft(0)) * B0_fft = t_fft
+        # Because fft(0) = 0 and the inverse of B has a very specific form,
+        # we can do several optimizations.
+        point_fft = fft(point)
+        t0_fft = [(point_fft[i] * d[i]) / q for i in range(n)]
+        t1_fft = [(-point_fft[i] * b[i]) / q for i in range(n)]
+        t_fft = [t0_fft, t1_fft]
+
+        # We now compute v such that:
+        #     v = z * B0 for an integral vector z
+        #     v is close to (point, 0)
+        if seed is None:
+            # If no seed is defined, use urandom as the pseudo-random source.
+            z_fft = ffsampling_fft(t_fft, T_fft, sigma_min[n], urandom)
+        else:
+            # If a seed is defined, initialize a ChaCha20 PRG
+            # that is used to generate pseudo-randomness.
+            chacha_prng = ChaCha20(seed)
+            z_fft = ffsampling_fft(t_fft, T_fft, sigma_min[n],
+                                   chacha_prng.randombytes)
+
+        v0_fft = add_fft(mul_fft(z_fft[0], a), mul_fft(z_fft[1], c))
+        v1_fft = add_fft(mul_fft(z_fft[0], b), mul_fft(z_fft[1], d))
+        
+        v0 = [int(round(elt)) for elt in ifft_2(v0_fft)]
+        v1 = [int(round(elt)) for elt in ifft_2(v1_fft)]
+
+        # The difference s = (point, 0) - v is such that:
+        #     s is short
+        #     s[0] + s[1] * h = point
+        s = [sub(point, v0), neg(v1)]
+        return s

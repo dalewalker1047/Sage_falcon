@@ -117,7 +117,32 @@ def ifft(f_fft):
     else:
         raise ValueError("FFT input size must be >= 2 and a power of 2")
     #return [x / 2 for x in f]
-    
+def ifft_2(f_fft):
+    """
+    Compute the inverse FFT of a polynomial mod (x^n + 1).
+
+    Input: list of CDF elements (FFT domain)
+    Output: list of real values (coefficients)
+    """
+    n = len(f_fft)
+
+    if n > 2:
+        f0_fft, f1_fft = split_fft(f_fft)
+        f0 = ifft_2(f0_fft)
+        f1 = ifft_2(f1_fft)
+        return merge([f0, f1])
+
+    elif n == 2:
+        # Falcon-specific unpacking:
+        z = CDF(f_fft[0])
+        return [
+            float(z.real()),
+            float(z.imag())
+        ]
+
+    else:
+        raise ValueError("FFT input size must be >= 2 and a power of 2")
+
 # Basic polynomial ops
 def add(f, g):
     """Addition of two polynomials (coefficient representation)."""
