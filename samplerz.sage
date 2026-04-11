@@ -186,33 +186,6 @@ def KAT_randbytes(k):
     return bytes.fromhex(oc)[::-1]
 
 
-def test_samplerz_KAT():
-    # octets is a global variable used as samplerz's randomness.
-    # It is set to many fixed values by test_samplerz_KAT,
-    # then used as a randomness source via KAT_randbits.
-    global octets
-    for D in sampler_KAT512 + sampler_KAT1024:
-        mu = D["mu"]
-        sigma = D["sigma"]
-        sigmin = D["sigmin"]
-        # Hard copy. octets is the randomness source for samplez
-        octets = D["octets"][:]
-        exp_z = D["z"]
-        try:
-            z = samplerz(mu, sigma, sigmin, randombytes=KAT_randbytes)
-        except IndexError:
-            return False
-
-        if (exp_z != z):
-            print("SamplerZ does not match KATs")
-            return False
-    return True
-"""
-if __name__ == "__main__":
-    print("Running samplerz KAT tests...")
-    ok = test_samplerz_KAT()
-    print("SamplerZ KATs:", "OK" if ok else "FAIL")
-"""
 """
 debugging test
 """

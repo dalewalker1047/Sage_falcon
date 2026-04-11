@@ -230,10 +230,8 @@ def ffsampling_fft(t, T, sigmin, randombytes):
     Corresponds to algorithm 11 (ffSampling) of Falcon's documentation.
     """
     #print("T: ", T[-2:])
-    
 
     n = len(t[0]) * fft_ratio
-    
     
     z = [0, 0]
     
@@ -249,13 +247,16 @@ def ffsampling_fft(t, T, sigmin, randombytes):
         # Sample first coordinate
         z0 = ffsampling_fft(split_fft(t0b), T0, sigmin, randombytes)
         z[0] = merge_fft(z0)
-        
+
         return z
 
     elif n == 1:
         # Leaf: scalar Gaussian sampling
         mu0 = clean_real(t[0][0])
         mu1 = clean_real(t[1][0])
+
+        # print("mu0 =", mu0)
+        # print("mu1 =", mu1)
 
         # IMPORTANT: Falcon uses T[0] as sigma directly
         d00 = T[0]
@@ -264,6 +265,8 @@ def ffsampling_fft(t, T, sigmin, randombytes):
         
         z[0] = [samplerz(mu0, sigma, sigmin, randombytes)]
         z[1] = [samplerz(mu1, sigma, sigmin, randombytes)]
+
+        # print ("z", z)
     
         return z
 

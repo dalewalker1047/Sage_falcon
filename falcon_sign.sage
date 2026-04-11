@@ -114,15 +114,17 @@ def sign(sk, message, randombytes=urandom):
     
     while True:
 
-        
-        if randombytes == urandom:
+        s = None
 
+        if randombytes == urandom:
             s = ffsampling_fft([hashed, hashed], T_fft, 1.2, randombytes)
         else:
             seed = randombytes(SEED_LEN)
             s = ffsampling_fft([hashed, hashed], T_fft, 1.2, seed)
-        #print("s[0]", s[0])
+        # print("s[0]", s[0])
         #print("\n\ns[1]", s[1])
+
+        # print("s", s)
 
         norm_sign = sum(int(coeff)**2 for coeff in s[0])
         norm_sign += sum(int(coeff)**2 for coeff in s[1])

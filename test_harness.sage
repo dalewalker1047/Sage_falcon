@@ -16,6 +16,35 @@ load('samplerz.sage')
 load('encoding.sage')
 load('ntt.sage')
 
+def test_samplerz_KAT():
+    # octets is a global variable used as samplerz's randomness.
+    # It is set to many fixed values by test_samplerz_KAT,
+    # then used as a randomness source via KAT_randbits.
+    global octets
+    total = 0
+    correct = 0
+
+    # Extract parameters from KAT vectors
+    for D in sampler_KAT512 + sampler_KAT1024:
+        total += 1
+        mu = D["mu"]
+        sigma = D["sigma"]
+        sigmin = D["sigmin"]
+        # Hard copy. octets is the randomness source for samplez
+        octets = D["octets"][:]
+        exp_z = D["z"]
+        try:
+            z = samplerz(mu, sigma, sigmin, randombytes=KAT_randbytes)
+            correct += 1
+        except IndexError:
+            return False
+
+        if (exp_z != z):
+            print("SamplerZ does not match KATs")
+            return False
+
+    print(f"Results: {correct}/{total} samples matched KATs")
+    return True
 
 def load_kat_vectors_from_sign_KAT():
     """Load KAT vectors from the sign_KAT.py file."""
@@ -101,6 +130,8 @@ def test_kat(count, seed, mlen, msg, pk, sk, smlen, sm):
 if __name__ == "__main__":
     # Load KAT vectors from sign_KAT.py
     kat_vectors = load_kat_vectors_from_sign_KAT()
+
+    test_samplerz_KAT()
     
     # Run tests for each KAT vector
     for vector in kat_vectors:
