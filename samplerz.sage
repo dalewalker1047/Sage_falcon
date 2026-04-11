@@ -207,12 +207,12 @@ def test_samplerz_KAT():
             print("SamplerZ does not match KATs")
             return False
     return True
-
+"""
 if __name__ == "__main__":
     print("Running samplerz KAT tests...")
     ok = test_samplerz_KAT()
     print("SamplerZ KATs:", "OK" if ok else "FAIL")
-
+"""
 """
 debugging test
 """

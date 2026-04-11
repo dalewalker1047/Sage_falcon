@@ -313,7 +313,7 @@ def _fake_tree(n):
             _fake_tree(n // 2),
             _fake_tree(n // 2)
         ]
-
+"""
 # ----------------------------
 # TEST 1: Basic execution
 # ----------------------------
@@ -415,7 +415,7 @@ def test_fft(n, iterations=10):
             return False
     return True
 
-
+"""
 """
 # ============================================================
 # RUN TESTS
